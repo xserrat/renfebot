@@ -1,0 +1,42 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+version: "3.1"
+services:
+
+    redis:
+      image: redis:alpine
+      container_name: renfebot-redis
+
+    mysql:
+      image: mysql:5.6
+      container_name: renfebot-mysql
+      working_dir: /application
+      volumes:
+        - ../:/application
+      environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=renfebot
+        - MYSQL_USER=renfebot
+        - MYSQL_PASSWORD=renfebot
+      ports:
+        - "9002:3306"
+
+    webserver:
+      image: nginx:alpine
+      container_name: renfebot-webserver
+      working_dir: /application
+      volumes:
+          - ../:/application
+          - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+       - "9000:80"
+
+    php-fpm:
+      build: phpdocker/php-fpm
+      container_name: renfebot-php-fpm
+      working_dir: /application
+      volumes:
+        - ../:/application
+        - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.2/fpm/conf.d/99-overrides.ini
+
